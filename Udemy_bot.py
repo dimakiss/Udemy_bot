@@ -14,7 +14,7 @@ def is_rate_valid(element):
     rate=element.find("div",{"class":"coupon-details-extra-3"}).find_all('p')[2].text
     rate=rate.split('Rate: ')[1]
     stars=float(rate.split('/')[0])
-    people=float(rate.split('/')[1])
+    people=int(rate.split('/')[1])
     return stars>=4.2 and people>=200
 
 def is_valid_coupon(element):
@@ -126,12 +126,14 @@ if __name__ == '__main__':
     browser.find_element_by_id("submit-id-submit").click()
 
     print("saving the courses to your udemy account")
+    course_count=0
     for url in potential_urls:
         try:
             browser.get(url)
             sleep(2)
             click()
+            course_count+=1
         except:
             pass
-
+    print("Done added "+str(course_count)+" courses")
     browser.close()
