@@ -64,7 +64,7 @@ def find_potential_urls():
             sleep(1)
         threading.Thread(target=add_links, args=(soup,)).start()
 
-    # you can add more categorys
+    # you can add more categories
     for l in range(1, 305): #might needed pages update
         url = "https://www.udemyfreebies.com/course-category/development/" + str(l)
         source = requests.get(url)
