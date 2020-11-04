@@ -12,8 +12,9 @@ pip install -r requirements.txt
 ```
 
 ## Usage 
-
+  
 Change the "EMAIL" and "PASSWORD" to your credentials
 ```
 python Udemy_bot.py
 ```
+`credentials as input will be added soon`
