@@ -116,7 +116,7 @@ def is_account_exist(email, password):
     # options.add_argument("--headless")
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
     browser = webdriver.Chrome(options=options)
-    browser.set_window_position(5000, 5000)
+    #browser.set_window_position(5000, 5000) make checking window invisible
     browser.get("https://www.udemy.com/join/login-popup/")
     sleep(1)
     browser.find_element_by_id("email--1").send_keys(email)
