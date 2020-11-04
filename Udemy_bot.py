@@ -95,8 +95,46 @@ def click():
     except:
         pass
 
+def is_account_exist(email,password):
 
+    '''
+    Checks if the credentials are correct
+    :param email: users email
+    :param password: users password
+    :return: if the credentials are correct
+    '''
+
+    print("Cheacking the email and the password are correct")
+    options = Options()
+    #options.add_argument("--incognito")
+    #options.add_argument("--headless")
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    browser = webdriver.Chrome(options=options)
+    browser.set_window_position(5000, 5000)
+    browser.get("https://www.udemy.com/join/login-popup/")
+    sleep(1)
+    browser.find_element_by_id("email--1").send_keys(email)
+    sleep(1)
+    browser.find_element_by_id("id_password").send_keys(password)
+    sleep(1)
+    temp_url=browser.current_url
+    browser.find_element_by_id("submit-id-submit").click()
+    sleep(4)
+    is_exist=temp_url==browser.current_url
+    browser.close()
+    return is_exist
+    
 if __name__ == '__main__':
+
+        if len(sys.argv)!=3:
+        print("Wrong input make sure you type you Email and Password")
+        exit()
+    elif is_account_exist(sys.argv[1],sys.argv[2]):
+        print("There was a problem logging in.Check your email and password or create an account.")
+        exit()
+
+    email=sys.argv[1]
+    password=sys.argv[2]
 
     potential_urls = []
     if glob.glob("urls.txt"):
@@ -104,24 +142,25 @@ if __name__ == '__main__':
             potential_urls=f.read().split("\n")
     else:
         find_potential_urls()
-
-    ###################
-    # save urls
-    f = open("urls.txt", "a")
-    for u in potential_urls:
-        f.write(u + "\n")
-    f.close()
-    ###################
+        ###################
+        # save urls
+        f = open("urls.txt", "a")
+        for u in potential_urls:
+            f.write(u + "\n")
+        f.close()
+        ###################
 
     print("found ", len(potential_urls), " urls")
     options = Options()
+
     # options.add_argument("user-data-dir=/tmp/tarun")
-    browser = webdriver.Chrome(chrome_options=options)
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    browser = webdriver.Chrome(options=options)
     browser.get("https://www.udemy.com/join/login-popup/")
     sleep(1)
-    browser.find_element_by_id("email--1").send_keys("EMAIL")
+    browser.find_element_by_id("email--1").send_keys(email)
     sleep(1)
-    browser.find_element_by_id("id_password").send_keys("PASSWORD")
+    browser.find_element_by_id("id_password").send_keys(password)
     sleep(1)
     browser.find_element_by_id("submit-id-submit").click()
 
