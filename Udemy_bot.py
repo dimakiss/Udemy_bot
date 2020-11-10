@@ -4,6 +4,66 @@ from time import sleep
 import requests, threading,glob,sys
 import bs4 as bs
 
+### CONFIG ###
+
+categories_list = [
+    'business',
+    'design',
+    'development',
+    'finance-and-accounting',
+    'health-and-fitness',
+    'it-and-software',
+    'lifestyle',
+    'marketing',
+    'music',
+    'office-productivity',
+    'personal-development',
+    'photography',
+    'photography-and-video',
+    'teaching-and-academics'
+]
+
+rating_stars = 4.2
+rating_people = 200
+
+#### END OF CONFIG ###
+
+def url_is_new(url):
+    '''
+    Check if the course url is new
+    :param url: url of the course
+    :return: if the course url is new
+    '''
+    if url not in enrolled_urls:
+        return True
+
+def find_last_page(category):
+    '''
+    find the last page of the category
+    :param category: the category to check
+    '''
+    url = f"https://www.udemyfreebies.com/course-category/{category}/"
+    source = requests.get(url)
+    soup = bs.BeautifulSoup(source.content, 'lxml')
+
+    pagination = soup.find("ul", {"class": "theme-pagination"})
+    pages = pagination.find_all("li")
+    lastpage = int(pages[-2].text) + 1
+    return lastpage
+
+def check_category(category, lastpage):
+    '''
+    Finds course urls from categories
+    :param category: the category to check
+    :param lastpage: the last page of the category
+    '''
+    for l in range(1, lastpage):  # might needed pages update
+        url = f"https://www.udemyfreebies.com/course-category/{category}/" + str(l)
+        source = requests.get(url)
+        soup = bs.BeautifulSoup(source.content, 'lxml')
+        while (threading.activeCount() >= 100):
+            sleep(1)
+        threading.Thread(target=add_links, args=(soup,)).start()
 
 def is_rate_valid(element):
     '''
@@ -16,7 +76,7 @@ def is_rate_valid(element):
     rate = rate.split('Rate: ')[1]
     stars = float(rate.split('/')[0])
     people = int(rate.split('/')[1])
-    return stars >= 4.2 and people >= 200
+    return stars >= rating_stars and people >= rating_people
 
 
 def is_valid_coupon(element):
@@ -45,7 +105,7 @@ def get_udemy_link(element):
 
 def add_links(soup):
     '''
-    Cheack if the course meets the conditions
+    Check if the course meets the conditions
     :param soup:  relevent BeautifulSoup object
     :return:
     '''
@@ -53,6 +113,7 @@ def add_links(soup):
         if is_valid_coupon(i):
             if is_valid_coupon(i) and is_rate_valid(i):
                 potential_urls.append(get_udemy_link(i))
+                print('\r', len(potential_urls), 'Potential Courses Scraped', end='', flush=True)
 
 
 def find_potential_urls():
@@ -60,25 +121,12 @@ def find_potential_urls():
     Finds all relevent courses
     '''
     print("Looking for potential links")
-    for l in range(1, 217):  # might needed pages update
-        url = "https://www.udemyfreebies.com/course-category/it-and-software/" + str(l)
-        source = requests.get(url)
-        soup = bs.BeautifulSoup(source.content, 'lxml')
-        while (threading.activeCount() >= 100):
-            sleep(1)
-        threading.Thread(target=add_links, args=(soup,)).start()
-
-    # you can add more categories
-    for l in range(1, 305):  # might needed pages update
-        url = "https://www.udemyfreebies.com/course-category/development/" + str(l)
-        source = requests.get(url)
-        soup = bs.BeautifulSoup(source.content, 'lxml')
-        while (threading.activeCount() >= 100):
-            sleep(1)
-        threading.Thread(target=add_links, args=(soup,)).start()
+    for cat in categories_list:
+        check_category(cat, find_last_page(cat)) 
 
     while (threading.activeCount() != 1):
         sleep(1)
+    print('\n')
 
 
 def click():
@@ -110,7 +158,7 @@ def is_account_exist(email, password):
     :return: if the credentials are correct
     '''
 
-    print("Cheacking the email and the password are correct")
+    print("Checking if the email and password are correct")
     options = Options()
     # options.add_argument("--incognito")
     # options.add_argument("--headless")
@@ -137,27 +185,31 @@ if __name__ == '__main__':
         print("Wrong input make sure you type you Email and Password")
         exit()
     elif is_account_exist(sys.argv[1], sys.argv[2]):
-        print("There was a problem logging in.Check your email and password or create an account.")
+        print("There was a problem logging in. Check your email and password or create an account.")
         exit()
 
     email = sys.argv[1]
     password = sys.argv[2]
 
+    enrolled_urls = []
     potential_urls = []
     if glob.glob("urls.txt"):
         with open("urls.txt") as f:
-            potential_urls = f.read().split("\n")
-    else:
-        find_potential_urls()
-        ###################
-        # save urls
-        f = open("urls.txt", "a")
-        for u in potential_urls:
-            f.write(u + "\n")
-        f.close()
-        ###################
+            enrolled_urls = f.read().split("\n")
 
-    print("found ", len(potential_urls), " urls")
+    find_potential_urls()
+    new_urls = []
+    ###################
+    # save urls
+    f = open("urls.txt", "a")
+    for u in potential_urls:
+        if url_is_new(u):
+            f.write(u + "\n")
+            new_urls.append(u)
+    f.close()
+    ###################
+
+    print("Found", len(new_urls), "new courses")
     options = Options()
 
     # options.add_argument("user-data-dir=/tmp/tarun")
@@ -171,9 +223,9 @@ if __name__ == '__main__':
     sleep(1)
     browser.find_element_by_id("submit-id-submit").click()
     
-    print("saving the courses to your udemy account")
+    print("Adding the courses to your udemy account")
     course_count = 0
-    for url in potential_urls:
+    for url in new_urls:
         try:
             browser.get(url)
             sleep(2)
