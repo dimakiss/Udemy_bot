@@ -22,7 +22,11 @@ categories_list = [
     'photography-and-video',
     'teaching-and-academics'
 ]
-
+#Personal preference for example
+#categories_list=[
+#    'development',
+#    'it-and-software'
+#]
 rating_stars = 4.2
 rating_people = 200
 
