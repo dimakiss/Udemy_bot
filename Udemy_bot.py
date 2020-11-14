@@ -6,27 +6,28 @@ import bs4 as bs
 
 ### CONFIG ###
 
-categories_list = [
-    'business',
-    'design',
-    'development',
-    'finance-and-accounting',
-    'health-and-fitness',
-    'it-and-software',
-    'lifestyle',
-    'marketing',
-    'music',
-    'office-productivity',
-    'personal-development',
-    'photography',
-    'photography-and-video',
-    'teaching-and-academics'
-]
-#Personal preference for example
-#categories_list=[
+
+#categories_list = [
+#    'business',
+#    'design',
 #    'development',
-#    'it-and-software'
+#    'finance-and-accounting',
+#    'health-and-fitness',
+#    'it-and-software',
+#    'lifestyle',
+#    'marketing',
+#    'music',
+#    'office-productivity',
+#    'personal-development',
+#    'photography',
+#    'photography-and-video',
+#    'teaching-and-academics'
 #]
+#Default
+categories_list=[
+    'development',
+    'it-and-software'
+]
 rating_stars = 4.2
 rating_people = 200
 
