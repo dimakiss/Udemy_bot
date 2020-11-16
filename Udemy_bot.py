@@ -115,10 +115,9 @@ def add_links(soup):
     :return:
     '''
     for i in soup.find_all("div", {"class": "col-md-4 col-sm-6"}):
-        if is_valid_coupon(i):
-            if is_valid_coupon(i) and is_rate_valid(i):
-                potential_urls.append(get_udemy_link(i))
-                print('\r', len(potential_urls), 'Potential Courses Scraped', end='', flush=True)
+        if is_valid_coupon(i) and is_rate_valid(i) and url_is_new(get_udemy_link(i)):
+            potential_urls.append(get_udemy_link(i))
+            print('\r', len(potential_urls), 'Potential Courses Scraped', end='', flush=True)
 
 
 def find_potential_urls():
