@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from time import sleep
-import requests, threading,glob,sys
+import requests, threading,glob,sys,os
 import bs4 as bs
 
 ### CONFIG ###
@@ -70,19 +70,30 @@ def check_category(category, lastpage):
             sleep(1)
         threading.Thread(target=add_links, args=(soup,)).start()
 
-def is_rate_valid(element):
-    '''
-    Finds if the current course meets the conditions
-    :param element: the element of the relevant course
-    :return: if the current course meets the conditions
-    '''
+#def is_rate_valid(element):
+#    '''
+#    Finds if the current course meets the conditions
+#    :param element: the element of the relevant course
+#    :return: if the current course meets the conditions
+#    '''
+#
+#    rate = element.find("div", {"class": "coupon-details-extra-3"}).find_all('p')[2].text
+#    rate = rate.split('Rate: ')[1]
+#    stars = float(rate.split('/')[0])
+#    people = int(rate.split('/')[1])
+#    return stars >= rating_stars and people >= rating_people
 
-    rate = element.find("div", {"class": "coupon-details-extra-3"}).find_all('p')[2].text
-    rate = rate.split('Rate: ')[1]
-    stars = float(rate.split('/')[0])
-    people = int(rate.split('/')[1])
-    return stars >= rating_stars and people >= rating_people
-
+def is_rate_valid(udemy_url):
+    try:
+        source = requests.get(udemy_url)
+        soup = bs.BeautifulSoup(source.content, 'lxml')
+        stars = float(soup.find("span", {"data-purpose": "rating-number"}).text)
+        people = int((soup.find("div", {"data-purpose": "rating"}).text).split("(")[1].split(" ")[0].replace(',',''))
+        return stars >= rating_stars and people >= rating_people
+    except:
+        #is no longer available.
+        return False
+    
 
 def is_valid_coupon(element):
     '''
@@ -115,9 +126,14 @@ def add_links(soup):
     :return:
     '''
     for i in soup.find_all("div", {"class": "col-md-4 col-sm-6"}):
-        if is_valid_coupon(i) and is_rate_valid(i):
-            potential_urls.append(get_udemy_link(i))
-            print('\r', len(potential_urls), 'Potential Courses Scraped', end='', flush=True)
+        #if is_valid_coupon(i) and is_rate_valid(i):# and url_is_new(get_udemy_link(i)):
+        #    potential_urls.append(get_udemy_link(i))
+        #    print('\r', len(potential_urls), 'Potential Courses Scraped', end='', flush=True)
+        if is_valid_coupon(i):
+            url=get_udemy_link(i)
+            if is_rate_valid(url):# and url_is_new(get_udemy_link(i)):
+                potential_urls.append(get_udemy_link(i))
+                print('\r', len(potential_urls), 'Potential Courses Scraped', end='', flush=True)
 
 
 def find_potential_urls():
@@ -191,7 +207,7 @@ if __name__ == '__main__':
     elif is_account_exist(sys.argv[1], sys.argv[2]):
         print("There was a problem logging in. Check your email and password or create an account.")
         exit()
-
+    os.system('cls')
     email = sys.argv[1]
     password = sys.argv[2]
 
@@ -213,7 +229,7 @@ if __name__ == '__main__':
     f.close()
     ###################
 
-    print("Found", len(new_urls), "new courses")
+    print(" Found", len(new_urls), "new courses\n")
     options = Options()
 
     # options.add_argument("user-data-dir=/tmp/tarun")
@@ -227,9 +243,10 @@ if __name__ == '__main__':
     sleep(1)
     browser.find_element_by_id("submit-id-submit").click()
     
-    print("Adding the courses to your udemy account")
+    print(" Adding the courses to your udemy account")
     course_count = 0
     for url in new_urls:
+        print('\r', len(new_urls)-new_urls.index(url), ' courses to go', end=' ', flush=True)
         try:
             browser.get(url)
             sleep(2)
@@ -241,5 +258,5 @@ if __name__ == '__main__':
                 course_count += 1
         except:
             pass
-    print("Done added " + str(course_count) + " courses")
+    print("\nDone added " + str(course_count) + " courses")
     browser.close()
