@@ -2,3 +2,4 @@ bs4==0.0.1
 requests==2.23.0
 lxml>=4.6.2
 selenium>=1.25.9
+webdriver-manager>=3.4.2

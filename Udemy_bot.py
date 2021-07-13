@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 from time import sleep
 import requests, threading,glob,sys,os
 import bs4 as bs
@@ -183,7 +184,7 @@ def is_account_exist(email, password):
     # options.add_argument("--incognito")
     # options.add_argument("--headless")
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    browser = webdriver.Chrome(options=options)
+    browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
     #browser.set_window_position(5000, 5000) make checking window invisible
     browser.get("https://www.udemy.com/join/login-popup/")
     sleep(1)
@@ -234,7 +235,7 @@ if __name__ == '__main__':
 
     # options.add_argument("user-data-dir=/tmp/tarun")
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    browser = webdriver.Chrome(options=options)
+    browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
     browser.get("https://www.udemy.com/join/login-popup/")
     sleep(1)
     browser.find_element_by_id("email--1").send_keys(email)
